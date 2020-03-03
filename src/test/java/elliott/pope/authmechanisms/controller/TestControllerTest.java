@@ -2,8 +2,6 @@ package elliott.pope.authmechanisms.controller;
 
 import elliott.pope.authmechanisms.TestMultipleAuthRunner;
 import elliott.pope.authmechanisms.utils.CertificateUtils;
-import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestMultipleAuthRunner.class)
+@SpringBootTest(classes = {TestMultipleAuthRunner.class})
 @AutoConfigureMockMvc
 public class TestControllerTest {
 
