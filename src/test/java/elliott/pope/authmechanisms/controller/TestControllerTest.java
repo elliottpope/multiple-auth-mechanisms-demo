@@ -2,8 +2,6 @@ package elliott.pope.authmechanisms.controller;
 
 import elliott.pope.authmechanisms.TestMultipleAuthRunner;
 import elliott.pope.authmechanisms.utils.CertificateUtils;
-import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.x509;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -45,7 +43,7 @@ public class TestControllerTest {
     public void test__BasicAuth__ClosedEndpoint() throws Exception {
         mvc.perform(get("/test/authenticate")
                 .secure(true)
-                .with(user("test-user-basic").password("test-password")))
+                .with(httpBasic("test-user-basic", "test-password")))
                 .andExpect(status().isOk())
                 .andExpect(content().string("test-user-basic"));
     }
@@ -54,7 +52,7 @@ public class TestControllerTest {
     public void test__BasicAuth__X509User() throws Exception {
         mvc.perform(get("/test/authenticate")
                 .secure(true)
-                .with(user("test-user-x509")))
+                .with(httpBasic("test-user-x509", "")))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -89,8 +87,7 @@ public class TestControllerTest {
     public void test__BasicAuth__X509OnlyEndpoint() throws Exception {
         mvc.perform(get("/test/authenticate/x509")
                 .secure(true)
-                .with(user("test-user-basic").password("test-password")))
-                .andDo(print())
+                .with(httpBasic("test-user-basic", "test-password")))
                 .andExpect(status().isForbidden());
     }
 
