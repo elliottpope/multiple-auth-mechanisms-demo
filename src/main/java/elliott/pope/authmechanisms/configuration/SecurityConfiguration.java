@@ -1,9 +1,12 @@
 package elliott.pope.authmechanisms.configuration;
 
+import org.springframework.boot.autoconfigure.web.ErrorProperties;
+import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
+import org.springframework.boot.web.servlet.error.ErrorAttributes;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,14 +18,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.springframework.security.web.authentication.preauth.x509.X509AuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -32,7 +31,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Collections;
-import java.util.Optional;
 
 @Configuration
 @EnableWebSecurity
@@ -57,10 +55,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     if ("test-user-x509".equals(s)) {
                         return new User("test-user-x509", "", Collections.singleton(new SimpleGrantedAuthority("X509")));
                     }
-                    throw new UsernameNotFoundException("User " + s + " not found.");
+                    throw new BadCredentialsException("User " + s + " not found.");
                 })
                 .and()
-                .addFilterBefore(new TokenAuthenticationFilter(), BasicAuthenticationFilter.class);
+                .addFilterAfter(new TokenAuthenticationFilter(), X509AuthenticationFilter.class);
     }
 
     @Override
@@ -99,6 +97,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                         this.logger.debug("Authentication request for failed: " + var10);
                     }
                     chain.doFilter(request, response);
+                    return;
                 }
             }
             chain.doFilter(request, response);
@@ -115,6 +114,16 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             }
             throw new BadCredentialsException("No user found for " + authentication.getCredentials());
         }
+    }
+
+    @Bean
+    public ErrorAttributes errorAttributes() {
+        return new DefaultErrorAttributes();
+    }
+
+    @Bean
+    public ErrorProperties errorProperties() {
+        return new ErrorProperties();
     }
 }
 

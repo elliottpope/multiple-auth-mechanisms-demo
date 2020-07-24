@@ -108,5 +108,26 @@ public class TestControllerTest {
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    public void test__BasicAndX509() throws Exception {
+        mvc.perform(get("/test/authenticate")
+                .secure(true)
+                .with(httpBasic("test--user-basic", "test-password"))
+                .with(x509(CertificateUtils.generate("test-user-x509", 1))))
+                .andExpect(status().isOk())
+                .andExpect(content().string("test-user-x509"));
+    }
+
+    @Test
+    public void test__X509AndBasicAndToken() throws Exception {
+        mvc.perform(get("/test/authenticate")
+                .secure(true)
+                .with(x509(CertificateUtils.generate("test-user-x509", 1)))
+                .with(httpBasic("test--user-basic", "test-password"))
+                .header("Authorization", "Token test-token"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("test-user-x509"));
+    }
+
 
 }
