@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestMultipleAuthRunner.class)
+@SpringBootTest(classes = {TestMultipleAuthRunner.class})
 @AutoConfigureMockMvc
 public class TestControllerTest {
 
